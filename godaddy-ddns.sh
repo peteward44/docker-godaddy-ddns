@@ -1,4 +1,6 @@
 #!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/env.sh
  
 # GoDaddy.sh v1.0 by Nazar78 @ TeaNazaR.com
 ###########################################

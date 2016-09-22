@@ -1,2 +1,2 @@
-*/10 * * * * root /godaddy-ddns.sh >> /var/log/cron.log 2>&1
+*/10 * * * * root /godaddy-ddns.sh > /var/log/godaddy-ddns.log 2>&1
 

@@ -15,9 +15,13 @@ RUN chmod 0755 /godaddy-ddns.sh
 ADD crontab /etc/cron.d/godaddy-ddns
 RUN chmod 0644 /etc/cron.d/godaddy-ddns
 
-# cron service
-#RUN mkdir -p /etc/my_init.d
-#RUN ln -s /usr/sbin/cron /etc/my_init.d/cron
+# add script that contains all environment variables so cron can see them
+RUN mkdir -p /etc/my_init.d
+ADD setup_env /etc/my_init.d/setup_env
+RUN chmod 0755 /etc/my_init.d/setup_env
+
+# set up symlink to PID 1 stdout to log file so we can see it via docker logs command
+RUN ln -sf /proc/1/fd/1 /var/log/godaddy-ddns.log
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
