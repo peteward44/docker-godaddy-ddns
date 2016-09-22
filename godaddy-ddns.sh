@@ -83,7 +83,7 @@ PublicIP=$(${Curl} -kLs ${CheckURL})
 if [ $? -eq 0 ] && [[ "${PublicIP}" =~ [0-9]{1,3}\.[0-9]{1,3} ]];then
   # convert to ipv6 if necessary
   if [ -z "$GODADDY_IPV6" ];then
-    yes
+    true 
   else
 	PublicIP=$(ipv6calc --in ipv4addr --out ipv6addr --action conv6to4 ${PublicIP})
   fi
