@@ -24,30 +24,6 @@ sudo docker run -d --name=ddns --restart=always \
         peteward44/godaddy-ddns
 ```
 
-For IPV6 domain mydomain.com
-```
-sudo docker run -d --name=ddns --restart=always \
-        -e "GODADDY_KEY=<YOUR_KEY>" \
-        -e "GODADDY_SECRET=<YOUR_SECRET>" \
-        -e "GODADDY_DOMAIN=mydomain.com" \
-        -e "GODADDY_TYPE=AAAA" \
-        -e "GODADDY_NAME=@" \
-        -e "GODADDY_IPV6=1" \
-        peteward44/godaddy-ddns
-```
-
-For IPV6 subdomain mysubdomain.mydomain.com
-```
-sudo docker run -d --name=ddns --restart=always \
-        -e "GODADDY_KEY=<YOUR_KEY>" \
-        -e "GODADDY_SECRET=<YOUR_SECRET>" \
-        -e "GODADDY_DOMAIN=mydomain.com" \
-        -e "GODADDY_TYPE=AAAA" \
-        -e "GODADDY_NAME=mysubdomain" \
-        -e "GODADDY_IPV6=1" \
-        peteward44/godaddy-ddns
-```
-
 ## Building
 sudo docker build --rm -t peteward44/godaddy-ddns .
 
