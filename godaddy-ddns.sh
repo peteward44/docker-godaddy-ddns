@@ -75,18 +75,12 @@ echo "Error: Requires 'Domain' value." && exit 1
 [ -z "${Name}" ] && Name=@
 [ -z "${TTL}" ] && TTL=600
 [ "${TTL}" -lt 600 ] && TTL=600
-/usr/bin/touch ${CachedIP} 2>/dev/null
-[ $? -ne 0 ] && echo "Error: Can't write to ${CachedIP}." && exit 1
+#/usr/bin/touch ${CachedIP} 2>/dev/null
+#[ $? -ne 0 ] && echo "Error: Can't write to ${CachedIP}." && exit 1
 [ -z "${CheckURL}" ] && CheckURL=http://api.ipify.org
 echo -n "Checking current 'Public IP' from '${CheckURL}'..."
 PublicIP=$(${Curl} -kLs ${CheckURL})
 if [ $? -eq 0 ] && [[ "${PublicIP}" =~ [0-9]{1,3}\.[0-9]{1,3} ]];then
-  # convert to ipv6 if necessary
-  if [ -z "$GODADDY_IPV6" ];then
-    true 
-  else
-	PublicIP=$(ipv6calc --in ipv4addr --out ipv6addr --action conv6to4 ${PublicIP})
-  fi
   echo "${PublicIP}!"
 else
   echo "Fail! ${PublicIP}"
