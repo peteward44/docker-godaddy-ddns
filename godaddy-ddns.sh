@@ -92,25 +92,25 @@ if [ "$(cat ${CachedIP} 2>/dev/null)" != "${PublicIP}" ];then
   Check=$(${Curl} -kLsH"Authorization: sso-key ${Key}:${Secret}" \
   -H"Content-type: application/json" \
   https://api.godaddy.com/v1/domains/${Domain}/records/${Type}/${Name} \
-  2>/dev/null|sed -r 's/.+data":"(.+)","t.+/\1/g' 2>/dev/null)
+  2>/dev/null|grep -Eo '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' 2>/dev/null)
   if [ $? -eq 0 ] && [ "${Check}" = "${PublicIP}" ];then
     echo -n ${Check}>${CachedIP}
     echo -e "unchanged!\nCurrent 'Public IP' matches 'GoDaddy' records. No update required!"
   else
     echo -en "changed!\nUpdating '${Domain}'..."
     Update=$(${Curl} -kLsXPUT -H"Authorization: sso-key ${Key}:${Secret}" \
-    -H"Content-type: application/json" \
+    -H"Content-type: application/json" -w"%{http_code}" -o/dev/null \
     https://api.godaddy.com/v1/domains/${Domain}/records/${Type}/${Name} \
-    -d "[{\"data\":\"${PublicIP}\",\"ttl\":${TTL}}]" 2>/dev/null)
-    if [ $? -eq 0 ] && [ "${Update}" = "" ];then
+    -d"[{\"data\":\"${PublicIP}\",\"ttl\":${TTL}}]" 2>/dev/null)
+    if [ $? -eq 0 ] && [ "${Update}" -eq 200 ];then
       echo -n ${PublicIP}>${CachedIP}
       echo "Success!"
       eval ${SuccessExec}
     else
-      echo "Fail! ${Update}"
+      echo "Fail! HTTP_ERROR:${Update}"
       eval ${FailedExec}
       exit 1
-    fi
+    fi  
   fi
 else
   echo "Current 'Public IP' matches 'Cached IP' recorded. No update required!"
