@@ -1,4 +1,4 @@
-FROM gliderlabs/alpine:3.4
+FROM gliderlabs/alpine:3.8
 MAINTAINER Pete Ward <peteward44@gmail.com>
 
 RUN apk add --no-cache bash curl
@@ -14,6 +14,10 @@ RUN chmod 0644 /var/spool/cron/crontabs/root
 # add script that contains all environment variables so cron can see them
 ADD setup_env /setup_env
 RUN chmod 0755 /setup_env
+
+ADD healthcheck.sh /healthcheck.sh
+RUN chmod 0755 /healthcheck.sh
+HEALTHCHECK --timeout=10 --interval=5m --retries=1 CMD /healthcheck.sh
 
 # set tmp permissions
 RUN chmod o+rwx /tmp

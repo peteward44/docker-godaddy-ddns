@@ -1,7 +1,10 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ERROR_FILE=/tmp/status.error
 source $DIR/env.sh
- 
+
+rm -f "$ERROR_FILE"
+
 # GoDaddy.sh v1.0 by Nazar78 @ TeaNazaR.com
 ###########################################
 # Simple DDNS script to update GoDaddy's DNS. Just schedule every 5mins in crontab.
@@ -50,27 +53,20 @@ CachedIP=/tmp/current_ip
 # External URL to check for current Public IP, must contain only a single plain text IP.
 # Default http://api.ipify.org.
 CheckURL=http://api.ipify.org
- 
-# Optional scripts/programs/commands to execute on successful update. Leave blank to disable.
-# This variable will be evaluated at runtime but will not be parsed for errors nor execution guaranteed.
-# Take note of the single quotes. If it's a script, ensure it's executable i.e. chmod 755 ./script.
-# Example: SuccessExec='/bin/echo "$(date): My public IP changed to ${PublicIP}!">>/var/log/GoDaddy.sh.log'
-SuccessExec=''
- 
-# Optional scripts/programs/commands to execute on update failure. Leave blank to disable.
-# This variable will be evaluated at runtime but will not be parsed for errors nor execution guaranteed.
-# Take note of the single quotes. If it's a script, ensure it's executable i.e. chmod 755 ./script.
-# Example: FailedExec='/some/path/something-went-wrong.sh ${Update} && /some/path/email-script.sh ${PublicIP}'
-FailedExec=''
 # End settings
+
+function onfail {
+   touch "$ERROR_FILE"
+   exit 1
+}
  
 Curl=$(/usr/bin/which curl 2>/dev/null)
 [ "${Curl}" = "" ] &&
-echo "Error: Unable to find 'curl CLI'." && exit 1
+echo "Error: Unable to find 'curl CLI'." && onfail
 [ -z "${Key}" ] || [ -z "${Secret}" ] &&
-echo "Error: Requires API 'Key/Secret' value." && exit 1
+echo "Error: Requires API 'Key/Secret' value." && onfail
 [ -z "${Domain}" ] &&
-echo "Error: Requires 'Domain' value." && exit 1
+echo "Error: Requires 'Domain' value." && onfail
 [ -z "${Type}" ] && Type=A
 [ -z "${Name}" ] && Name=@
 [ -z "${TTL}" ] && TTL=600
@@ -81,11 +77,10 @@ echo "Error: Requires 'Domain' value." && exit 1
 echo -n "Checking current 'Public IP' from '${CheckURL}'..."
 PublicIP=$(${Curl} -kLs ${CheckURL})
 if [ $? -eq 0 ] && [[ "${PublicIP}" =~ [0-9]{1,3}\.[0-9]{1,3} ]];then
-  echo "${PublicIP}!"
+#  echo "${PublicIP}!"
 else
   echo "Fail! ${PublicIP}"
-  eval ${FailedExec}
-  exit 1
+  onfail
 fi
 if [ "$(cat ${CachedIP} 2>/dev/null)" != "${PublicIP}" ];then
   echo -n "Checking '${Domain}' IP records from 'GoDaddy'..."
@@ -96,6 +91,7 @@ if [ "$(cat ${CachedIP} 2>/dev/null)" != "${PublicIP}" ];then
   if [ $? -eq 0 ] && [ "${Check}" = "${PublicIP}" ];then
     echo -n ${Check}>${CachedIP}
     echo -e "unchanged!\nCurrent 'Public IP' matches 'GoDaddy' records. No update required!"
+    exit 0
   else
     echo -en "changed!\nUpdating '${Domain}'..."
     Update=$(${Curl} -kLsXPUT -H"Authorization: sso-key ${Key}:${Secret}" \
@@ -105,14 +101,14 @@ if [ "$(cat ${CachedIP} 2>/dev/null)" != "${PublicIP}" ];then
     if [ $? -eq 0 ] && [ "${Update}" -eq 200 ];then
       echo -n ${PublicIP}>${CachedIP}
       echo "Success!"
-      eval ${SuccessExec}
+      exit 0
     else
       echo "Fail! HTTP_ERROR:${Update}"
-      eval ${FailedExec}
-      exit 1
-    fi  
+      onfail
+    fi
   fi
 else
   echo "Current 'Public IP' matches 'Cached IP' recorded. No update required!"
+  exit 0
 fi
 exit $?
