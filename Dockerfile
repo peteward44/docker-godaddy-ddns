@@ -17,7 +17,7 @@ RUN chmod 0755 /setup_env
 
 ADD healthcheck.sh /healthcheck.sh
 RUN chmod 0755 /healthcheck.sh
-HEALTHCHECK --timeout=10 --interval=5m --retries=1 CMD /healthcheck.sh
+HEALTHCHECK --timeout=10s --interval=5m --retries=1 CMD /healthcheck.sh
 
 # set tmp permissions
 RUN chmod o+rwx /tmp
