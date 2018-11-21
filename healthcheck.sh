@@ -1,4 +1,4 @@
 #!/bin/bash
 
-if [ -f /status.error ] ; then exit 1; else exit 0; fi
+if [ -f /tmp/status.success ] ; then exit 0; else exit 1; fi
 

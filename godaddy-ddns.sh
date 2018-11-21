@@ -1,9 +1,9 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ERROR_FILE=/tmp/status.error
+SUCCESS_FILE=/tmp/status.success
 source $DIR/env.sh
 
-rm -f "$ERROR_FILE"
+rm -f "$SUCCESS_FILE"
 
 # GoDaddy.sh v1.0 by Nazar78 @ TeaNazaR.com
 ###########################################
@@ -56,8 +56,12 @@ CheckURL=http://api.ipify.org
 # End settings
 
 function onfail {
-   touch "$ERROR_FILE"
    exit 1
+}
+
+function onsuccess {
+   touch "$SUCCESS_FILE"
+   exit 0
 }
  
 Curl=$(/usr/bin/which curl 2>/dev/null)
@@ -77,7 +81,7 @@ echo "Error: Requires 'Domain' value." && onfail
 echo -n "Checking current 'Public IP' from '${CheckURL}'..."
 PublicIP=$(${Curl} -kLs ${CheckURL})
 if [ $? -eq 0 ] && [[ "${PublicIP}" =~ [0-9]{1,3}\.[0-9]{1,3} ]];then
-#  echo "${PublicIP}!"
+  echo "${PublicIP}!"
 else
   echo "Fail! ${PublicIP}"
   onfail
@@ -91,7 +95,7 @@ if [ "$(cat ${CachedIP} 2>/dev/null)" != "${PublicIP}" ];then
   if [ $? -eq 0 ] && [ "${Check}" = "${PublicIP}" ];then
     echo -n ${Check}>${CachedIP}
     echo -e "unchanged!\nCurrent 'Public IP' matches 'GoDaddy' records. No update required!"
-    exit 0
+    onsuccess
   else
     echo -en "changed!\nUpdating '${Domain}'..."
     Update=$(${Curl} -kLsXPUT -H"Authorization: sso-key ${Key}:${Secret}" \
@@ -101,7 +105,7 @@ if [ "$(cat ${CachedIP} 2>/dev/null)" != "${PublicIP}" ];then
     if [ $? -eq 0 ] && [ "${Update}" -eq 200 ];then
       echo -n ${PublicIP}>${CachedIP}
       echo "Success!"
-      exit 0
+      onsuccess
     else
       echo "Fail! HTTP_ERROR:${Update}"
       onfail
@@ -109,6 +113,6 @@ if [ "$(cat ${CachedIP} 2>/dev/null)" != "${PublicIP}" ];then
   fi
 else
   echo "Current 'Public IP' matches 'Cached IP' recorded. No update required!"
-  exit 0
+  onsuccess
 fi
 exit $?
