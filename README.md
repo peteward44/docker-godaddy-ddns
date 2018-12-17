@@ -25,7 +25,10 @@ sudo docker run -d --name=ddns --restart=always \
 ```
 
 ## Building
-sudo docker build --rm -t peteward44/godaddy-ddns .
+This uses a multi-architecture docker manifest as described here https://lobradov.github.io/Building-docker-multiarch-images/
+```
+./build.sh
+```
 
 ## Credit
 Uses modified script from http://teanazar.com/2016/05/godaddy-ddns-updater/
