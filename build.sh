@@ -24,8 +24,8 @@ for arch in amd64 arm32v6 arm64v8; do
   docker push peteward44/godaddy-ddns:${arch}-latest
 done
 
-docker-linux-amd64 manifest create peteward44/godaddy-ddns:latest peteward44/godaddy-ddns:amd64-latest peteward44/godaddy-ddns:arm32v6-latest peteward44/godaddy-ddns:arm64v8-latest
-docker-linux-amd64 manifest annotate peteward44/godaddy-ddns:latest peteward44/godaddy-ddns:arm32v6-latest --os linux --arch arm
-docker-linux-amd64 manifest annotate peteward44/godaddy-ddns:latest peteward44/godaddy-ddns:arm64v8-latest --os linux --arch arm64 --variant armv8
-docker-linux-amd64 manifest push peteward44/godaddy-ddns:latest
+docker manifest create peteward44/godaddy-ddns:latest peteward44/godaddy-ddns:amd64-latest peteward44/godaddy-ddns:arm32v6-latest peteward44/godaddy-ddns:arm64v8-latest
+docker manifest annotate peteward44/godaddy-ddns:latest peteward44/godaddy-ddns:arm32v6-latest --os linux --arch arm
+docker manifest annotate peteward44/godaddy-ddns:latest peteward44/godaddy-ddns:arm64v8-latest --os linux --arch arm64 --variant armv8
+docker manifest push peteward44/godaddy-ddns:latest
 

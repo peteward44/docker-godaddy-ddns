@@ -26,8 +26,15 @@ sudo docker run -d --name=ddns --restart=always \
 
 ## Building
 This uses a multi-architecture docker manifest as described here https://lobradov.github.io/Building-docker-multiarch-images/
+
+This will prepare the repo by downloading the different qemu binaries
 ```
-./build.sh
+sudo ./prep.sh
+```
+
+Then this will actually build it. You will need experimental CLI options enabled in your ~/.docker/config.json file ```{ "experimental": "enabled" }```
+```
+sudo ./build.sh
 ```
 
 ## Credit
